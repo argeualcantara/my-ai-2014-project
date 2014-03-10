@@ -4,7 +4,6 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map.Entry;
 
 import controle.Constantes;
 
@@ -28,9 +27,9 @@ public class Poupador extends ProgramaPoupador {
 
 	public Poupador() {
 		this.pontosVisitados = new HashMap<Point, Integer>();
-		esquerda = new ArrayList<Integer>(Arrays.asList(10, 11));
+		esquerda = new ArrayList<Integer>(Arrays.asList(10, 11, 0, 1, 5, 6, 14, 15, 19, 20));
 		cima = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
-		direita = new ArrayList<Integer>(Arrays.asList(12, 13));
+		direita = new ArrayList<Integer>(Arrays.asList(12, 13, 3, 4, 8, 9, 17, 18, 22, 23));
 		baixo = new ArrayList<Integer>(Arrays.asList(14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
 		perto = new ArrayList<Integer>(Arrays.asList(6, 7, 8, 11, 12, 15, 16, 17));
 	}
@@ -40,8 +39,8 @@ public class Poupador extends ProgramaPoupador {
 		pesoPontoAtual(sensor.getPosicao());
 		analisarLocaisVisitados();
 		analisarVisao();
-		analisarOlfato(sensor.getAmbienteOlfatoLadrao());
-		analisarOlfato(sensor.getAmbienteOlfatoPoupador());
+		analisarOlfato(sensor.getAmbienteOlfatoLadrao(),true);
+		analisarOlfato(sensor.getAmbienteOlfatoPoupador(), false);
 		return decidirMovimento();
 	}
 
@@ -79,7 +78,7 @@ public class Poupador extends ProgramaPoupador {
 		for (int i = 0; i < visao.length; i++) {
 			switch (visao[i]) {
 			case SEM_VISAO:
-				this.pesos[i] += -300;
+				this.pesos[i] += -200;
 				break;
 			case FORA_AMBIENTE:
 				this.pesos[i] += -600;
@@ -88,11 +87,13 @@ public class Poupador extends ProgramaPoupador {
 				this.pesos[i] += -600;
 				break;
 			case BANCO:
-				this.pesos[i] += 300 * (sensor.getNumeroDeMoedas() - 5);
+				this.pesos[i] += 500 * (sensor.getNumeroDeMoedas());
 				break;
 			case MOEDA:
-				this.pesos[i] += 1200;
+				this.pesos[i] += 1400;
 				break;
+			case PASTILHA_PODER:
+				this.pesos[i] += (sensor.getNumeroDeMoedas() < 5)? -500 : 400;
 			default:
 
 				if (visao[i] >= 100) {
@@ -107,11 +108,21 @@ public class Poupador extends ProgramaPoupador {
 		}
 	}
 
-	public void analisarOlfato(int[] olfato) {
-
-		for (int i = 0; i < olfato.length; i++) {
-
-			this.pesos[perto.get(i)] += (olfato[i] == 0) ? 1000 : -1000 * (5 - olfato[i]);
+	public void analisarOlfato(int[] olfato, boolean ladrao) {
+		if(ladrao){
+			for (int i = 0; i < olfato.length; i++) {
+				
+				this.pesos[perto.get(i)] += (olfato[i] == 0) ? 1000 : -1000 * (5 - olfato[i]);
+				if(sensor.getNumeroDeMoedas() == 0){
+					this.pesos[perto.get(i)] += 1500 * (5 - olfato[i]);
+				}
+			}
+		}
+		else{
+			for (int i = 0; i < olfato.length; i++) {
+				
+				this.pesos[perto.get(i)] += (olfato[i] == 0) ? 1000 : -500 * (5 - olfato[i]);
+			}
 		}
 
 	}
@@ -121,22 +132,22 @@ public class Poupador extends ProgramaPoupador {
 		// considerar a posição do banco
 		Point banco = Constantes.posicaoBanco;
 		if (banco.x < sensor.getPosicao().x) {
-			pesos[11] += sensor.getNumeroDeMoedas() * 40;
+			pesos[11] += sensor.getNumeroDeMoedas() * 50;
 		}
 
 		if (banco.x > sensor.getPosicao().x) {
 
-			pesos[12] += sensor.getNumeroDeMoedas() * 40;
+			pesos[12] += sensor.getNumeroDeMoedas() * 50;
 		}
 
 		if (banco.y < sensor.getPosicao().y) {
 
-			pesos[7] += sensor.getNumeroDeMoedas() * 40;
+			pesos[7] += sensor.getNumeroDeMoedas() * 50;
 		}
 
 		if (banco.y > sensor.getPosicao().y) {
 
-			pesos[16] += sensor.getNumeroDeMoedas() * 40;
+			pesos[16] += sensor.getNumeroDeMoedas() * 50;
 		}
 
 		// resumir os pesos para apenas as 4 direções possíveis de movimento
@@ -193,11 +204,11 @@ public class Poupador extends ProgramaPoupador {
 		}
 
 		if ((visao[posicao] == PASTILHA_PODER) && (sensor.getNumeroDeMoedas() < 5)) {
-			return -4000;
+			return -5000;
 		}
 
 		if ((visao[posicao] == BANCO) && (sensor.getNumeroDeMoedas() == 0)) {
-			return -2000;
+			return -4000;
 		}
 
 		return 0;
