@@ -4,6 +4,8 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 import controle.Constantes;
 
@@ -24,8 +26,10 @@ public class Poupador extends ProgramaPoupador {
 	private ArrayList<Integer> perto;
 	private int[] visao;
 	private HashMap<Point, Integer> pontosVisitados;
+	private HashMap<String, Integer> mapa;
 
 	public Poupador() {
+		mapa = new HashMap<String, Integer>();
 		this.pontosVisitados = new HashMap<Point, Integer>();
 		esquerda = new ArrayList<Integer>(Arrays.asList(10, 11, 0, 1, 5, 6, 14, 15, 19, 20));
 		cima = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
@@ -35,7 +39,8 @@ public class Poupador extends ProgramaPoupador {
 	}
 
 	public int acao() {
-		this.pesos = new int[24];		
+		this.pesos = new int[24];
+		reduzirTimeStampMapa();
 		pesoPontoAtual(sensor.getPosicao());
 		analisarLocaisVisitados();
 		analisarVisao();
@@ -52,6 +57,11 @@ public class Poupador extends ProgramaPoupador {
 			pontosVisitados.put(p, peso);
 		} else {
 			pontosVisitados.put(p, -50);
+		}
+		if(mapa.get(sensor.getPosicao().x+""+sensor.getPosicao().y) != null){
+			mapa.put(sensor.getPosicao().x+""+sensor.getPosicao().y, mapa.get(sensor.getPosicao().x+""+sensor.getPosicao().y)+1);
+		}else{
+			mapa.put(sensor.getPosicao().x+""+sensor.getPosicao().y, 10);
 		}
 	}
 
@@ -156,7 +166,7 @@ public class Poupador extends ProgramaPoupador {
 		int pesoDireita = somarPesos(direita) + pesoObstaculo(12);
 		int pesoCima = somarPesos(cima) + pesoObstaculo(7);
 		int pesoBaixo = somarPesos(baixo) + pesoObstaculo(16);
-
+		
 		int[] pesosDirecao = { pesoCima, pesoBaixo, pesoDireita, pesoEsquerda };
 
 		int maiorPeso = -999999;
@@ -222,7 +232,27 @@ public class Poupador extends ProgramaPoupador {
 			soma += pesos[i];
 
 		}
+		int timeStamp = mapa.get(sensor.getPosicao().x+""+sensor.getPosicao().y) == null?
+				0
+			:
+				mapa.get(sensor.getPosicao().x+""+sensor.getPosicao().y);
+
+		int pesoTimeStamp = (-100 * timeStamp);
+		soma += pesoTimeStamp;
 		return soma;
+	}
+	
+	private void reduzirTimeStampMapa(){
+		List<String> removidos = new ArrayList<String>();
+		for (Entry<String, Integer> entry : mapa.entrySet()) {
+			entry.setValue(entry.getValue()-1);
+			if(entry.getValue() == 0){
+				removidos.add(entry.getKey());
+			}
+		}
+		for (String string : removidos) {
+			mapa.remove(string);
+		}
 	}
 
 }
