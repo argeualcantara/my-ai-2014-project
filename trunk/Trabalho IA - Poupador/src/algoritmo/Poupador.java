@@ -58,11 +58,7 @@ public class Poupador extends ProgramaPoupador {
 		} else {
 			pontosVisitados.put(p, -50);
 		}
-		if(mapa.get(sensor.getPosicao().x+""+sensor.getPosicao().y) != null){
-			mapa.put(sensor.getPosicao().x+""+sensor.getPosicao().y, mapa.get(sensor.getPosicao().x+""+sensor.getPosicao().y)+1);
-		}else{
-			mapa.put(sensor.getPosicao().x+""+sensor.getPosicao().y, 10);
-		}
+		mapa.put(sensor.getPosicao().x+""+sensor.getPosicao().y, 20);
 	}
 
 	// torna mais difícil a visitação de pontos já visitados
@@ -72,10 +68,21 @@ public class Poupador extends ProgramaPoupador {
 		Point baixo = new Point(p.x, p.y + 1);
 		Point esquerda = new Point(p.x - 1, p.y);
 		Point direita = new Point(p.x + 1, p.y);
-		pesos[7] += (pontosVisitados.get(cima) == null ? 0 : pontosVisitados.get(cima));
-		pesos[12] += (pontosVisitados.get(direita) == null ? 0 : pontosVisitados.get(direita));
-		pesos[16] += (pontosVisitados.get(baixo) == null ? 0 : pontosVisitados.get(baixo));
-		pesos[11] += (pontosVisitados.get(esquerda) == null ? 0 : pontosVisitados.get(esquerda));
+//		pesos[7] += (pontosVisitados.get(cima) == null ? 0 : pontosVisitados.get(cima));
+//		pesos[12] += (pontosVisitados.get(direita) == null ? 0 : pontosVisitados.get(direita));
+//		pesos[16] += (pontosVisitados.get(baixo) == null ? 0 : pontosVisitados.get(baixo));
+//		pesos[11] += (pontosVisitados.get(esquerda) == null ? 0 : pontosVisitados.get(esquerda));
+		
+//		int timeStamp = mapa.get(sensor.getPosicao().x+""+sensor.getPosicao().y) == null?
+//				0
+//			:
+//				mapa.get(sensor.getPosicao().x+""+sensor.getPosicao().y);
+
+//		int pesoTimeStamp = (-80 * timeStamp);
+		pesos[7] += (mapa.get(cima.x+""+cima.y) == null ? 0 : -50 *mapa.get(cima.x+""+cima.y));
+		pesos[12] += (mapa.get(direita.x+""+cima.y) == null ? 0 : -50 *mapa.get(direita.x+""+cima.y));
+		pesos[16] += (mapa.get(baixo.x+""+baixo.y) == null ? 0 : -50 *mapa.get(baixo.x+""+baixo.y));
+		pesos[11] += (mapa.get(esquerda.x+""+esquerda.y) == null ? 0 : -50 *mapa.get(esquerda.x+""+esquerda.y));
 
 	}
 
@@ -100,15 +107,17 @@ public class Poupador extends ProgramaPoupador {
 				this.pesos[i] += 500 * (sensor.getNumeroDeMoedas());
 				break;
 			case MOEDA:
-				this.pesos[i] += 1400;
+				this.pesos[i] += 2600;
 				break;
 			case PASTILHA_PODER:
-				this.pesos[i] += (sensor.getNumeroDeMoedas() < 5)? -500 : 400;
+				this.pesos[i] += -800;//(sensor.getNumeroDeMoedas() < 5)? -800 : -400;
 			default:
-
 				if (visao[i] >= 100) {
 					// é outro poupador ou um ladrão
 					this.pesos[i] += -1000;
+					if(visao[i] > 100 && sensor.getNumeroDeMoedas() == 0){
+						this.pesos[i] += 2000;
+					}
 				} else {
 					this.pesos[i] += -5;
 				}
@@ -124,14 +133,14 @@ public class Poupador extends ProgramaPoupador {
 				
 				this.pesos[perto.get(i)] += (olfato[i] == 0) ? 1000 : -1000 * (5 - olfato[i]);
 				if(sensor.getNumeroDeMoedas() == 0){
-					this.pesos[perto.get(i)] += 1500 * (5 - olfato[i]);
+					this.pesos[perto.get(i)] += (2000 * (5 - olfato[i]));
 				}
 			}
 		}
 		else{
 			for (int i = 0; i < olfato.length; i++) {
 				
-				this.pesos[perto.get(i)] += (olfato[i] == 0) ? 1000 : -500 * (5 - olfato[i]);
+				this.pesos[perto.get(i)] += (olfato[i] == 0) ? 1000 : (-500 * (5 - olfato[i]));
 			}
 		}
 
@@ -142,22 +151,22 @@ public class Poupador extends ProgramaPoupador {
 		// considerar a posição do banco
 		Point banco = Constantes.posicaoBanco;
 		if (banco.x < sensor.getPosicao().x) {
-			pesos[11] += sensor.getNumeroDeMoedas() * 50;
+			pesos[11] += sensor.getNumeroDeMoedas() * 70;
 		}
 
 		if (banco.x > sensor.getPosicao().x) {
 
-			pesos[12] += sensor.getNumeroDeMoedas() * 50;
+			pesos[12] += sensor.getNumeroDeMoedas() * 70;
 		}
 
 		if (banco.y < sensor.getPosicao().y) {
 
-			pesos[7] += sensor.getNumeroDeMoedas() * 50;
+			pesos[7] += sensor.getNumeroDeMoedas() * 70;
 		}
 
 		if (banco.y > sensor.getPosicao().y) {
 
-			pesos[16] += sensor.getNumeroDeMoedas() * 50;
+			pesos[16] += sensor.getNumeroDeMoedas() * 70;
 		}
 
 		// resumir os pesos para apenas as 4 direções possíveis de movimento
@@ -213,12 +222,12 @@ public class Poupador extends ProgramaPoupador {
 			return -5000;
 		}
 
-		if ((visao[posicao] == PASTILHA_PODER) && (sensor.getNumeroDeMoedas() < 5)) {
-			return -5000;
+		if ((visao[posicao] == PASTILHA_PODER)) {//&& (sensor.getNumeroDeMoedas() < 5)) {
+			return -6000;
 		}
 
 		if ((visao[posicao] == BANCO) && (sensor.getNumeroDeMoedas() == 0)) {
-			return -4000;
+			return -5000;
 		}
 
 		return 0;
@@ -232,13 +241,6 @@ public class Poupador extends ProgramaPoupador {
 			soma += pesos[i];
 
 		}
-		int timeStamp = mapa.get(sensor.getPosicao().x+""+sensor.getPosicao().y) == null?
-				0
-			:
-				mapa.get(sensor.getPosicao().x+""+sensor.getPosicao().y);
-
-		int pesoTimeStamp = (-100 * timeStamp);
-		soma += pesoTimeStamp;
 		return soma;
 	}
 	
