@@ -39,7 +39,7 @@ public class Poupador extends ProgramaPoupador {
 	}
 
 	public int acao() {
-		this.pesos = new int[24];
+		this.pesos = new int[24];		
 		reduzirTimeStampMapa();
 		pesoPontoAtual(sensor.getPosicao());
 		analisarLocaisVisitados();
@@ -114,7 +114,7 @@ public class Poupador extends ProgramaPoupador {
 			default:
 				if (visao[i] >= 100) {
 					// é outro poupador ou um ladrão
-					this.pesos[i] += -1000;
+					this.pesos[i] += -12000;
 					if(visao[i] > 100 && sensor.getNumeroDeMoedas() == 0){
 						this.pesos[i] += 2000;
 					}
@@ -219,11 +219,11 @@ public class Poupador extends ProgramaPoupador {
 	private int pesoObstaculo(int posicao) {
 
 		if ((visao[posicao] == PAREDE) || (visao[posicao] == FORA_AMBIENTE) || (visao[posicao] >= 100)) {
-			return -5000;
+			return -10000;
 		}
 
 		if ((visao[posicao] == PASTILHA_PODER)) {//&& (sensor.getNumeroDeMoedas() < 5)) {
-			return -6000;
+			return -12000;
 		}
 
 		if ((visao[posicao] == BANCO) && (sensor.getNumeroDeMoedas() == 0)) {
