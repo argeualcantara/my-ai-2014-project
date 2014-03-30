@@ -27,8 +27,12 @@ public class Poupador extends ProgramaPoupador {
 	private int[] visao;
 	private HashMap<Point, Integer> pontosVisitados;
 	private HashMap<String, Integer> mapa;
+	private Point pontoAnterior;
+	private int acaoAnterior;
+	private ArrayList<Integer> acoesAnteriores;
 
 	public Poupador() {
+		acoesAnteriores = new ArrayList<Integer>();
 		mapa = new HashMap<String, Integer>();
 		this.pontosVisitados = new HashMap<Point, Integer>();
 		esquerda = new ArrayList<Integer>(Arrays.asList(10, 11, 0, 1, 5, 6, 14, 15, 19, 20));
@@ -109,6 +113,7 @@ public class Poupador extends ProgramaPoupador {
 					} else {
 						this.pesos[i] += -12000;
 					}
+
 				} else {
 					this.pesos[i] += -5;
 				}
@@ -163,6 +168,18 @@ public class Poupador extends ProgramaPoupador {
 
 		int[] pesosDirecao = { pesoCima, pesoBaixo, pesoDireita, pesoEsquerda };
 
+		// se a ação anterior foi ineficaz, reduz o peso para ela
+
+		if ((pontoAnterior != null) && (pontoAnterior.equals(sensor.getPosicao()))) {
+			acoesAnteriores.add(acaoAnterior);
+			for (int i : acoesAnteriores) {
+				pesosDirecao[i - 1] += -6000;
+			}
+
+		} else {
+			acoesAnteriores.clear();
+		}
+
 		int maiorPeso = -999999;
 		int direcao = -1;
 
@@ -187,12 +204,16 @@ public class Poupador extends ProgramaPoupador {
 
 		}
 
+		pontoAnterior = sensor.getPosicao();
+		acaoAnterior = direcao;
+
 		/*
 		 * os valores de retorno são 0: ficar parado 1: ir pra cima 2: ir pra
 		 * baixo 3: ir pra direita 4: ir pra esquerda
 		 */
 
-		System.out.println(direcao + " " + pesoCima + " " + pesoBaixo + " " + pesoDireita + " " + pesoEsquerda + " " + sensor.getPosicao());
+		// System.out.println(direcao + " " + pesoCima + " " + pesoBaixo + " " +
+		// pesoDireita + " " + pesoEsquerda + " " + sensor.getPosicao());
 
 		if ((direcao < 1) || (direcao > 4)) {
 			return 0;
