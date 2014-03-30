@@ -30,6 +30,8 @@ public class Poupador extends ProgramaPoupador {
 	private Point pontoAnterior;
 	private int acaoAnterior;
 	private ArrayList<Integer> acoesAnteriores;
+	private int tempoSemPegarMoedas;
+	private int moedasAnteriores;
 
 	public Poupador() {
 		acoesAnteriores = new ArrayList<Integer>();
@@ -141,22 +143,28 @@ public class Poupador extends ProgramaPoupador {
 
 	public int decidirMovimento() {
 
+		if ((moedasAnteriores == sensor.getNumeroDeMoedas()) && (sensor.getNumeroDeMoedas() > 0)) {
+			tempoSemPegarMoedas++;
+		} else {
+			tempoSemPegarMoedas = 0;
+		}
+
 		// considerar a posição do banco
 		Point banco = Constantes.posicaoBanco;
 		if (banco.x < sensor.getPosicao().x) {
-			pesos[11] += sensor.getNumeroDeMoedas() * 70;
+			pesos[11] += sensor.getNumeroDeMoedas() * (70 + tempoSemPegarMoedas);
 		}
 
 		if (banco.x > sensor.getPosicao().x) {
-			pesos[12] += sensor.getNumeroDeMoedas() * 70;
+			pesos[12] += sensor.getNumeroDeMoedas() * (70 + tempoSemPegarMoedas);
 		}
 
 		if (banco.y < sensor.getPosicao().y) {
-			pesos[7] += sensor.getNumeroDeMoedas() * 70;
+			pesos[7] += sensor.getNumeroDeMoedas() * (70 + tempoSemPegarMoedas);
 		}
 
 		if (banco.y > sensor.getPosicao().y) {
-			pesos[16] += sensor.getNumeroDeMoedas() * 70;
+			pesos[16] += sensor.getNumeroDeMoedas() * (70 + tempoSemPegarMoedas);
 		}
 
 		// resumir os pesos para apenas as 4 direções possíveis de movimento
@@ -206,6 +214,7 @@ public class Poupador extends ProgramaPoupador {
 
 		pontoAnterior = sensor.getPosicao();
 		acaoAnterior = direcao;
+		moedasAnteriores = sensor.getNumeroDeMoedas();
 
 		/*
 		 * os valores de retorno são 0: ficar parado 1: ir pra cima 2: ir pra
